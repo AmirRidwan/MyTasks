@@ -1,13 +1,16 @@
 package com.example.mytasks_simpletaskmanager.fragments
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mytasks_simpletaskmanager.R
 import com.example.mytasks_simpletaskmanager.databinding.FragmentHomeBinding
 import com.example.mytasks_simpletaskmanager.utils.adapter.TaskAdapter
 import com.example.mytasks_simpletaskmanager.utils.model.ToDoData
@@ -20,8 +23,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
-class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener,
-    TaskAdapter.TaskAdapterInterface {
+class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener, TaskAdapter.TaskAdapterInterface {
 
     private val TAG = "HomeFragment"
     private lateinit var binding: FragmentHomeBinding
@@ -29,6 +31,7 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
     private var frag: ToDoDialogFragment? = null
     private lateinit var auth: FirebaseAuth
     private lateinit var authId: String
+    private lateinit var navController: NavController
 
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var toDoItemList: MutableList<ToDoData>
@@ -45,14 +48,12 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        init()
+        init(view)
 
         //get data from firebase
         getTaskFromFirebase()
 
-
         binding.addTaskBtn.setOnClickListener {
-
             if (frag != null)
                 childFragmentManager.beginTransaction().remove(frag!!).commit()
             frag = ToDoDialogFragment()
@@ -62,44 +63,44 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
                 childFragmentManager,
                 ToDoDialogFragment.TAG
             )
+        }
 
+        binding.logoutButton.setOnClickListener {
+            logout()
         }
     }
 
     private fun getTaskFromFirebase() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-
                 toDoItemList.clear()
                 for (taskSnapshot in snapshot.children) {
-                    val todoTask =
-                        taskSnapshot.key?.let { ToDoData(it, taskSnapshot.value.toString()) }
-
+                    val todoTask = taskSnapshot.key?.let { ToDoData(it, taskSnapshot.value.toString()) }
                     if (todoTask != null) {
                         toDoItemList.add(todoTask)
                     }
-
                 }
-                Log.d(TAG, "onDataChange: " + toDoItemList)
                 taskAdapter.notifyDataSetChanged()
-
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show()
             }
-
-
         })
     }
 
-    private fun init() {
-
+    private fun init(view: View) {
+        navController = Navigation.findNavController(view)
         auth = FirebaseAuth.getInstance()
-        authId = auth.currentUser!!.uid
-        database = Firebase.database.reference.child("Tasks")
-            .child(authId)
+        authId = auth.currentUser?.uid ?: ""
 
+        // Ensure user is authenticated
+        if (authId.isEmpty()) {
+            navController.navigate(R.id.action_homeFragment_to_signInFragment)
+            return
+        }
+
+        database = Firebase.database.reference.child("Tasks").child(authId)
 
         binding.mainRecyclerView.setHasFixedSize(true)
         binding.mainRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -110,21 +111,26 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
         binding.mainRecyclerView.adapter = taskAdapter
     }
 
-    override fun saveTask(todoTask: String, todoEdit: TextInputEditText) {
+    private fun logout() {
+        auth.signOut()
+        navController.navigate(R.id.action_homeFragment_to_signInFragment)
+    }
 
-        database
-            .push().setValue(todoTask)
-            .addOnCompleteListener {
+    override fun saveTask(todoTask: String, todoEdit: TextInputEditText) {
+        val taskId = database.push().key // Generate a unique key for each task
+        if (taskId != null) {
+            database.child(taskId).setValue(todoTask).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Toast.makeText(context, "Task Added Successfully", Toast.LENGTH_SHORT).show()
                     todoEdit.text = null
-
                 } else {
-                    Toast.makeText(context, it.exception.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, it.exception?.message, Toast.LENGTH_SHORT).show()
                 }
             }
+        } else {
+            Toast.makeText(context, "Failed to add task", Toast.LENGTH_SHORT).show()
+        }
         frag!!.dismiss()
-
     }
 
     override fun updateTask(toDoData: ToDoData, todoEdit: TextInputEditText) {
@@ -161,5 +167,4 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
             ToDoDialogFragment.TAG
         )
     }
-
 }
