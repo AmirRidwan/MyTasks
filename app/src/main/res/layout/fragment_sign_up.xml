@@ -185,7 +185,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:fontFamily="@font/inter_regular"
-        android:text="Already Registered !!"
+        android:text="Already Registered?"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/textViewSignIn"
         app:layout_constraintHorizontal_bias="0.5"

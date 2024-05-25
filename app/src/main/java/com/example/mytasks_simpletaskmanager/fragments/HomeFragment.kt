@@ -130,7 +130,7 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
         } else {
             Toast.makeText(context, "Failed to add task", Toast.LENGTH_SHORT).show()
         }
-        frag!!.dismiss()
+        frag?.dismiss()
     }
 
     override fun updateTask(toDoData: ToDoData, todoEdit: TextInputEditText) {
