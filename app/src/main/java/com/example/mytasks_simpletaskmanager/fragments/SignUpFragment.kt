@@ -11,13 +11,14 @@ import androidx.navigation.Navigation
 import com.example.mytasks_simpletaskmanager.R
 import com.example.mytasks_simpletaskmanager.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.FirebaseAuth
-
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUpFragment : Fragment() {
 
     private lateinit var navController: NavController
     private lateinit var mAuth: FirebaseAuth
     private lateinit var binding: FragmentSignUpBinding
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,7 +32,6 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         init(view)
 
         binding.textViewSignIn.setOnClickListener {
@@ -39,36 +39,54 @@ class SignUpFragment : Fragment() {
         }
 
         binding.nextBtn.setOnClickListener {
+            val name = binding.nameEt.text.toString()
             val email = binding.emailEt.text.toString()
             val pass = binding.passEt.text.toString()
             val verifyPass = binding.verifyPassEt.text.toString()
 
-            if (email.isNotEmpty() && pass.isNotEmpty() && verifyPass.isNotEmpty()) {
+            if (name.isNotEmpty() && email.isNotEmpty() && pass.isNotEmpty() && verifyPass.isNotEmpty()) {
                 if (pass == verifyPass) {
-
-                    registerUser(email, pass)
-
+                    registerUser(name, email, pass)
                 } else {
                     Toast.makeText(context, "Password is not same", Toast.LENGTH_SHORT).show()
                 }
             } else
                 Toast.makeText(context, "Empty fields are not allowed", Toast.LENGTH_SHORT).show()
         }
-
     }
 
-    private fun registerUser(email: String, pass: String) {
+    private fun registerUser(name: String, email: String, pass: String) {
         mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener {
-            if (it.isSuccessful)
-                navController.navigate(R.id.action_signUpFragment_to_homeFragment)
-            else
+            if (it.isSuccessful) {
+                saveUserToFirestore(name, email)
+            } else {
                 Toast.makeText(context, it.exception.toString(), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
+    private fun saveUserToFirestore(name: String, email: String) {
+        val userId = mAuth.currentUser?.uid
+        val user = hashMapOf(
+            "name" to name,
+            "email" to email
+        )
+
+        userId?.let {
+            firestore.collection("users").document(it).set(user)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Welcome $name !", Toast.LENGTH_SHORT).show()
+                    navController.navigate(R.id.action_signUpFragment_to_homeFragment)
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Error saving user: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
     private fun init(view: View) {
         navController = Navigation.findNavController(view)
         mAuth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
     }
 }

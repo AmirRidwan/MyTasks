@@ -1,3 +1,7 @@
 package com.example.mytasks_simpletaskmanager.utils.model
 
-data class ToDoData(var taskId: String, var task: String)
+data class ToDoData(
+    val taskId: String = "",
+    val task: String = ""
+)
+

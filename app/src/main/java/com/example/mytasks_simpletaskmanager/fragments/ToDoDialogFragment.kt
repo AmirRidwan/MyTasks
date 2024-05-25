@@ -1,74 +1,91 @@
+package com.example.mytasks_simpletaskmanager.fragments
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.example.mytasks_simpletaskmanager.databinding.FragmentToDoDialogBinding
-import com.example.mytasks_simpletaskmanager.utils.model.ToDoData
+import com.example.mytasks_simpletaskmanager.R
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class ToDoDialogFragment : DialogFragment() {
 
-    private lateinit var binding: FragmentToDoDialogBinding
+    interface OnDialogNextBtnClickListener {
+        fun saveTask(todoTask: String, todoEdit: TextInputEditText)
+        fun updateTask(taskId: String, todoTask: String, todoEdit: TextInputEditText)
+    }
+
     private var listener: OnDialogNextBtnClickListener? = null
     private var taskId: String? = null
-    private var todoTask: String? = null
+    private var task: String? = null
 
-    fun setListener(listener: OnDialogNextBtnClickListener) {
-        this.listener = listener
-    }
+    private lateinit var todoEdit: TextInputEditText
+    private lateinit var todoClose: ImageView
+    private lateinit var todoNextBtn: ImageView
 
     companion object {
         const val TAG = "ToDoDialogFragment"
 
-        @JvmStatic
-        fun newInstance(taskId: String, task: String) =
-            ToDoDialogFragment().apply {
-                arguments = Bundle().apply {
-                    putString("taskId", taskId)
-                    putString("task", task)
-                }
-            }
+        fun newInstance(taskId: String?, task: String?): ToDoDialogFragment {
+            val frag = ToDoDialogFragment()
+            val args = Bundle()
+            args.putString("taskId", taskId)
+            args.putString("task", task)
+            frag.arguments = args
+            return frag
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            taskId = it.getString("taskId")
+            task = it.getString("task")
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentToDoDialogBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.fragment_to_do_dialog, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        todoEdit = view.findViewById(R.id.todoEt)
+        todoClose = view.findViewById(R.id.todoClose)
+        todoNextBtn = view.findViewById(R.id.todoNextBtn)
 
-        arguments?.let { args ->
-            taskId = args.getString("taskId")
-            todoTask = args.getString("task")
-            binding.todoEt.setText(todoTask)
+        if (task != null) {
+            todoEdit.setText(task)
         }
 
-        binding.todoClose.setOnClickListener {
+        todoClose.setOnClickListener {
             dismiss()
         }
 
-        binding.todoNextBtn.setOnClickListener {
-            val todoTask = binding.todoEt.text.toString()
-            if (todoTask.isNotEmpty()) {
-                if (taskId == null) {
-                    listener?.saveTask(todoTask, binding.todoEt)
-                } else {
-                    taskId?.let { taskId ->
-                        listener?.updateTask(taskId, todoTask, binding.todoEt)
-                    }
-                }
-                dismiss()
+        todoNextBtn.setOnClickListener {
+            val todoTask = todoEdit.text.toString().trim()
+            if (todoTask.isEmpty()) {
+                Toast.makeText(context, "Please enter a task", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (taskId == null) {
+                listener?.saveTask(todoTask, todoEdit)
+            } else {
+                listener?.updateTask(taskId!!, todoTask, todoEdit)
             }
         }
     }
 
-    interface OnDialogNextBtnClickListener {
-        fun saveTask(todoTask: String, todoEdit: TextInputEditText)
-        fun updateTask(taskId: String, todoTask: String, todoEdit: TextInputEditText)
+    fun setListener(listener: OnDialogNextBtnClickListener) {
+        this.listener = listener
     }
 }

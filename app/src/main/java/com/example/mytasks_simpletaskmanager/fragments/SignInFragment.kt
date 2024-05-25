@@ -11,13 +11,14 @@ import androidx.navigation.Navigation
 import com.example.mytasks_simpletaskmanager.R
 import com.example.mytasks_simpletaskmanager.databinding.FragmentSignInBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SignInFragment : Fragment() {
 
     private lateinit var navController: NavController
     private lateinit var mAuth: FirebaseAuth
     private lateinit var binding: FragmentSignInBinding
-
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,27 +42,43 @@ class SignInFragment : Fragment() {
             val email = binding.emailEt.text.toString()
             val pass = binding.passEt.text.toString()
 
-            if (email.isNotEmpty() && pass.isNotEmpty())
-
+            if (email.isNotEmpty() && pass.isNotEmpty()) {
                 loginUser(email, pass)
-            else
+            } else {
                 Toast.makeText(context, "Empty fields are not allowed", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun loginUser(email: String, pass: String) {
         mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener {
-            if (it.isSuccessful)
-                navController.navigate(R.id.action_signInFragment_to_homeFragment)
-            else
+            if (it.isSuccessful) {
+                fetchUserNameAndWelcome()
+            } else {
                 Toast.makeText(context, it.exception.toString(), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
+    private fun fetchUserNameAndWelcome() {
+        val userId = mAuth.currentUser?.uid
+
+        userId?.let {
+            firestore.collection("users").document(it).get()
+                .addOnSuccessListener { document ->
+                    val name = document.getString("name")
+                    Toast.makeText(context, "Welcome $name!", Toast.LENGTH_SHORT).show()
+                    navController.navigate(R.id.action_signInFragment_to_homeFragment)
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Error fetching user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
     private fun init(view: View) {
         navController = Navigation.findNavController(view)
         mAuth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
     }
-
 }

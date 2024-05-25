@@ -1,8 +1,7 @@
 package com.example.mytasks_simpletaskmanager.fragments
 
-import ToDoDialogFragment
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,14 +16,7 @@ import com.example.mytasks_simpletaskmanager.utils.adapter.TaskAdapter
 import com.example.mytasks_simpletaskmanager.utils.model.ToDoData
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.*
 
 class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener, TaskAdapter.TaskAdapterInterface {
 
@@ -43,7 +35,6 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -53,7 +44,6 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
 
         init(view)
 
-        //get data from firebase
         getTaskFromFirebase()
 
         binding.addTaskBtn.setOnClickListener {
@@ -74,43 +64,35 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
     }
 
     private fun getTaskFromFirebase() {
-        Firebase.firestore.collection("tasks")
-            .document(authId)
-            .collection("task")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                toDoItemList.clear()
+                for (dataSnapshot in snapshot.children) {
+                    val toDoData = dataSnapshot.getValue(ToDoData::class.java)
+                    toDoData?.let { toDoItemList.add(it) }
                 }
+                taskAdapter.notifyDataSetChanged()
+            }
 
-                snapshot?.let {
-                    toDoItemList.clear()
-                    for (doc in snapshot.documents) {
-                        val taskId = doc.id
-                        val task = doc.getString("task")
-                        if (taskId != null && task != null) {
-                            val toDoData = ToDoData(taskId, task)
-                            toDoItemList.add(toDoData)
-                        }
-                    }
-                    taskAdapter.notifyDataSetChanged()
+            override fun onCancelled(error: DatabaseError) {
+                context?.let {
+                    Toast.makeText(it, error.message, Toast.LENGTH_SHORT).show()
                 }
             }
+        })
     }
-
 
     private fun init(view: View) {
         navController = Navigation.findNavController(view)
         auth = FirebaseAuth.getInstance()
         authId = auth.currentUser?.uid ?: ""
 
-        // Ensure user is authenticated
         if (authId.isEmpty()) {
             navController.navigate(R.id.action_homeFragment_to_signInFragment)
             return
         }
 
-        database = Firebase.database.reference.child("Tasks").child(authId)
+        database = FirebaseDatabase.getInstance("https://mytasks-9c536-default-rtdb.asia-southeast1.firebasedatabase.app/").reference.child("Tasks").child(authId)
 
         binding.mainRecyclerView.setHasFixedSize(true)
         binding.mainRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -124,38 +106,34 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
     private fun logout() {
         auth.signOut()
         navController.navigate(R.id.action_homeFragment_to_signInFragment)
+        Toast.makeText(context, "You're logged out", Toast.LENGTH_SHORT).show()
     }
 
     override fun saveTask(todoTask: String, todoEdit: TextInputEditText) {
-        val db = FirebaseFirestore.getInstance()
-        val user = FirebaseAuth.getInstance().currentUser
-        val taskId = db.collection("tasks").document().id // Generate a unique ID for the task
-        val task = hashMapOf(
-            "userId" to user?.uid,
-            "taskId" to taskId,
-            "task" to todoTask
-        )
+        Log.d(TAG, "saveTask called with task: $todoTask")
+        val taskId = database.push().key ?: return
+        val task = ToDoData(taskId, todoTask)
 
-        db.collection("tasks")
-            .document(taskId)
-            .set(task)
+        Log.d(TAG, "Database reference: ${database.child(taskId).toString()}")
+
+        database.child(taskId).setValue(task)
             .addOnSuccessListener {
+                Log.d(TAG, "Task added successfully")
                 Toast.makeText(context, "Task Added Successfully", Toast.LENGTH_SHORT).show()
                 todoEdit.text = null
             }
             .addOnFailureListener { e ->
+                Log.e(TAG, "Failed to add task", e)
                 Toast.makeText(context, "Failed to add task: $e", Toast.LENGTH_SHORT).show()
             }
 
         frag?.dismiss()
     }
 
-
     override fun updateTask(taskId: String, todoTask: String, todoEdit: TextInputEditText) {
-        // Update the task in Firestore database using the provided taskId
-        val db = Firebase.firestore
-        val taskRef = db.collection("Tasks").document(taskId)
-        taskRef.update("Task", todoTask)
+        val task = mapOf("task" to todoTask)
+
+        database.child(taskId).updateChildren(task)
             .addOnSuccessListener {
                 Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
             }
@@ -163,10 +141,8 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
                 Toast.makeText(context, "Error updating task: ${e.message}", Toast.LENGTH_SHORT).show()
             }
 
-        // Dismiss the dialog
         frag?.dismiss()
     }
-
 
     override fun onDeleteItemClicked(toDoData: ToDoData, position: Int) {
         database.child(toDoData.taskId).removeValue().addOnCompleteListener {
