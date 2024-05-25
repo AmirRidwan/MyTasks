@@ -2,15 +2,15 @@
     <!-- Base application theme. -->
     <style name="Theme.mytasks_simpletaskmanager" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">#0288D1</item> <!-- Blue -->
+        <item name="colorPrimaryVariant">#0277BD</item> <!-- Darker Blue -->
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/secondary_color</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorSecondary">#26A69A</item> <!-- Teal -->
+        <item name="colorSecondaryVariant">#00897B</item> <!-- Darker Teal -->
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">@color/secondary_color</item>
+        <item name="android:statusBarColor" tools:targetApi="l">#26A69A</item> <!-- Teal -->
         <!-- Customize your theme here. -->
     </style>
 </resources>

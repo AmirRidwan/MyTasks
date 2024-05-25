@@ -67,7 +67,7 @@ class SignInFragment : Fragment() {
             firestore.collection("users").document(it).get()
                 .addOnSuccessListener { document ->
                     val name = document.getString("name")
-                    Toast.makeText(context, "Welcome $name!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Welcome $name !", Toast.LENGTH_SHORT).show()
                     navController.navigate(R.id.action_signInFragment_to_homeFragment)
                 }
                 .addOnFailureListener { e ->
