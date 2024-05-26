@@ -22,8 +22,8 @@ MyTasks is a simple task manager app that allows users to add, edit, and delete 
 
 -Add a new task: Click on the "+" button and enter the task details.
 
--Edit a task: Click on the task to edit its details.
+-Edit a task: Click on the edit icon to edit its details.
 
--Delete a task: Swipe left on a task to delete it.
+-Delete a task: Click delete icon on a task to delete it.
 
 -View and edit profile: Click on the profile icon to view and edit your profile details.
