@@ -44,15 +44,33 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="todo"
+        android:text="MyTasks"
         android:textColor="@color/text_color"
-        android:textStyle="italic"
+        android:textStyle="normal"
         android:gravity="center_horizontal"
-        android:fontFamily="@font/inter_extra_bold"
+        android:fontFamily="@font/lexenddeca_extrabold"
         android:textSize="60sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lexenddeca_regular"
+        android:gravity="center_horizontal"
+        android:text="Simple Task Manager"
+        android:textColor="@color/text_color"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.581" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

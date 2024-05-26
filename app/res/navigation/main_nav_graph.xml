@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.example.kotlintodopractice.fragments.SplashFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.SplashFragment"
         android:label="fragment_splash"
         tools:layout="@layout/fragment_splash">
         <action
@@ -22,9 +22,10 @@
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
     <fragment
         android:id="@+id/signInFragment"
-        android:name="com.example.kotlintodopractice.fragments.SignInFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in">
         <action
@@ -38,9 +39,10 @@
             app:popUpTo="@id/signInFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.example.kotlintodopractice.fragments.SignUpFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.SignUpFragment"
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up">
         <action
@@ -54,9 +56,45 @@
             app:popUpTo="@id/signUpFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.kotlintodopractice.fragments.HomeFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.HomeFragment"
         android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_signInFragment"
+            app:destination="@id/signInFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_profileViewFragment"
+            app:destination="@id/profileViewFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileViewFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.ProfileViewFragment"
+        android:label="fragment_profile_view"
+        tools:layout="@layout/fragment_profile_view">
+        <action
+            android:id="@+id/action_profileViewFragment_to_profileEditFragment"
+            app:destination="@id/profileEditFragment" />
+        <action
+            android:id="@+id/action_profileViewFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileEditFragment"
+        android:name="com.example.mytasks_simpletaskmanager.fragments.ProfileEditFragment"
+        android:label="fragment_profile_edit"
+        tools:layout="@layout/fragment_profile_edit">
+        <action
+            android:id="@+id/action_profileEditFragment_to_profileViewFragment"
+            app:destination="@id/profileViewFragment"
+            app:popUpTo="@id/profileEditFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
 </navigation>

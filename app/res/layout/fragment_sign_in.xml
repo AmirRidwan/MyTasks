@@ -11,6 +11,7 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
+        android:contentDescription="TODO"
         android:scaleType="fitXY"
         android:src="@drawable/design_one"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,6 +23,7 @@
         android:id="@+id/imageView2"
         android:layout_width="60dp"
         android:layout_height="130dp"
+        android:contentDescription="TODO"
         android:rotation="180"
         android:scaleType="fitXY"
         android:src="@drawable/ellipse_one"
@@ -34,6 +36,7 @@
         android:layout_width="0dp"
         android:layout_height="210dp"
         android:layout_marginStart="12dp"
+        android:contentDescription="TODO"
         android:scaleType="fitXY"
         android:src="@drawable/design_two"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -48,8 +51,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
-        android:fontFamily="@font/inter_extra_bold"
-        android:text="Sign In"
+        android:fontFamily="@font/lexenddeca_extrabold"
+        android:text="Login"
         android:textColor="@color/white"
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -82,11 +85,11 @@
                 android:id="@+id/emailEt"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:paddingTop="15dp"
                 android:background="@color/white"
                 android:hint="@string/enter_your_email"
                 android:inputType="textEmailAddress"
-                android:paddingStart="12dp" />
+                android:paddingStart="12dp"
+                android:paddingTop="15dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -120,11 +123,11 @@
                 android:id="@+id/passEt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="15dp"
                 android:background="@color/white"
                 android:hint="@string/enter_your_pass"
                 android:inputType="textPassword"
-                android:paddingStart="12dp" />
+                android:paddingStart="12dp"
+                android:paddingTop="15dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -148,8 +151,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:fontFamily="@font/inter_regular"
-        android:text="Not Registered Yet ??"
+        android:fontFamily="@font/lexenddeca_regular"
+        android:text="Not Registered?"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/textViewSignUp"
         app:layout_constraintHorizontal_bias="0.5"
@@ -161,7 +164,7 @@
         android:id="@+id/textViewSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter_regular"
+        android:fontFamily="@font/lexenddeca_regular"
         android:text=" Sign Up"
         android:textColor="@color/text_color"
         android:textSize="16sp"
