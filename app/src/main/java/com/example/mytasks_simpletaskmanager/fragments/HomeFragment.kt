@@ -72,6 +72,13 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
                     toDoData?.let { toDoItemList.add(it) }
                 }
                 taskAdapter.notifyDataSetChanged()
+
+                // Show or hide the empty list message
+                if (toDoItemList.isEmpty()) {
+                    binding.emptyListMessage.visibility = View.VISIBLE
+                } else {
+                    binding.emptyListMessage.visibility = View.GONE
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -92,14 +99,16 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
             return
         }
 
-        database = FirebaseDatabase.getInstance("https://mytasks-9c536-default-rtdb.asia-southeast1.firebasedatabase.app/").reference.child("Tasks").child(authId)
+        database =
+            FirebaseDatabase.getInstance("https://mytasks-9c536-default-rtdb.asia-southeast1.firebasedatabase.app/").reference.child(
+                "Tasks"
+            ).child(authId)
 
         binding.mainRecyclerView.setHasFixedSize(true)
         binding.mainRecyclerView.layoutManager = LinearLayoutManager(context)
 
         toDoItemList = mutableListOf()
-        taskAdapter = TaskAdapter(toDoItemList)
-        taskAdapter.setListener(this)
+        taskAdapter = TaskAdapter(toDoItemList, this)
         binding.mainRecyclerView.adapter = taskAdapter
     }
 
@@ -110,12 +119,9 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
     }
 
     override fun saveTask(todoTask: String, todoEdit: TextInputEditText) {
-        Log.d(TAG, "saveTask called with task: $todoTask")
+        Log.d(TAG, "save Task called with task: $todoTask")
         val taskId = database.push().key ?: return
-        val task = ToDoData(taskId, todoTask)
-
-        Log.d(TAG, "Database reference: ${database.child(taskId).toString()}")
-
+        val task = ToDoData(taskId, todoTask, false)
         database.child(taskId).setValue(task)
             .addOnSuccessListener {
                 Log.d(TAG, "Task added successfully")
@@ -138,7 +144,8 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
                 Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error updating task: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error updating task: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
 
         frag?.dismiss()
@@ -164,5 +171,18 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
             childFragmentManager,
             ToDoDialogFragment.TAG
         )
+    }
+
+    override fun onTaskCheckChanged(toDoData: ToDoData, isChecked: Boolean) {
+        Log.d(TAG, "Task ${toDoData.taskId} check changed to $isChecked")
+        database.child(toDoData.taskId).child("done").setValue(isChecked)
+            .addOnSuccessListener {
+                val status = if (isChecked) "completed" else "marked as incomplete"
+                Toast.makeText(context, "Task ${status} successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error updating task: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
+            }
     }
 }

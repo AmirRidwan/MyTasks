@@ -9,9 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.mytasks_simpletaskmanager.R
 import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 
 class ToDoDialogFragment : DialogFragment() {
 

@@ -1,51 +1,49 @@
 package com.example.mytasks_simpletaskmanager.utils.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mytasks_simpletaskmanager.databinding.EachTodoItemBinding
+import com.example.mytasks_simpletaskmanager.R
 import com.example.mytasks_simpletaskmanager.utils.model.ToDoData
+import com.example.mytasks_simpletaskmanager.databinding.EachTodoItemBinding
 
-class TaskAdapter(private val list: MutableList<ToDoData>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(
+    private var toDoList: MutableList<ToDoData>,
+    private val listener: TaskAdapterInterface
+) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
-    private  val TAG = "TaskAdapter"
-    private var listener:TaskAdapterInterface? = null
-    fun setListener(listener:TaskAdapterInterface){
-        this.listener = listener
-    }
-    class TaskViewHolder(val binding: EachTodoItemBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class TaskViewHolder(val binding: EachTodoItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        val binding =
-            EachTodoItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = EachTodoItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TaskViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        with(holder) {
-            with(list[position]) {
-                binding.todoTask.text = this.task
+        val currentItem = toDoList[position]
+        holder.binding.todoTask.text = currentItem.task
+        holder.binding.checkTaskDone.isChecked = currentItem.done
 
-                Log.d(TAG, "onBindViewHolder: "+this)
-                binding.editTask.setOnClickListener {
-                    listener?.onEditItemClicked(this , position)
-                }
+        holder.binding.checkTaskDone.setOnCheckedChangeListener { _, isChecked ->
+            listener.onTaskCheckChanged(currentItem, isChecked)
+        }
 
-                binding.deleteTask.setOnClickListener {
-                    listener?.onDeleteItemClicked(this , position)
-                }
-            }
+        holder.binding.editTask.setOnClickListener {
+            listener.onEditItemClicked(currentItem, position)
+        }
+
+        holder.binding.deleteTask.setOnClickListener {
+            listener.onDeleteItemClicked(currentItem, position)
         }
     }
 
     override fun getItemCount(): Int {
-        return list.size
+        return toDoList.size
     }
 
-    interface TaskAdapterInterface{
-        fun onDeleteItemClicked(toDoData: ToDoData , position : Int)
-        fun onEditItemClicked(toDoData: ToDoData , position: Int)
+    interface TaskAdapterInterface {
+        fun onDeleteItemClicked(toDoData: ToDoData, position: Int)
+        fun onEditItemClicked(toDoData: ToDoData, position: Int)
+        fun onTaskCheckChanged(toDoData: ToDoData, isChecked: Boolean)
     }
-
 }
