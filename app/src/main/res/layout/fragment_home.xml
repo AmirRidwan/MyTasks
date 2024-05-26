@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:fontFamily="@font/lexenddeca_regular"
             android:gravity="center"
-            android:text="What's your Todo List for Today?"
+            android:text="What's your Task for Today?"
             android:textSize="18dp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
