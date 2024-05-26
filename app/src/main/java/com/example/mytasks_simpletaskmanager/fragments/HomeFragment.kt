@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.mytasks_simpletaskmanager.R
 import com.example.mytasks_simpletaskmanager.databinding.FragmentHomeBinding
 import com.example.mytasks_simpletaskmanager.utils.adapter.TaskAdapter
@@ -17,8 +18,10 @@ import com.example.mytasks_simpletaskmanager.utils.model.ToDoData
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
 
-class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener, TaskAdapter.TaskAdapterInterface {
+class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener,
+    TaskAdapter.TaskAdapterInterface {
 
     private val TAG = "HomeFragment"
     private lateinit var binding: FragmentHomeBinding
@@ -61,6 +64,27 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
         binding.logoutButton.setOnClickListener {
             logout()
         }
+
+        binding.profileAvatar.setOnClickListener {
+            navController.navigate(R.id.action_homeFragment_to_profileViewFragment)
+        }
+
+// Load profile image from Firestore
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(authId)
+        userDocRef.get()
+            .addOnSuccessListener { document ->
+                val profileImageUrl = document.getString("profileImageUrl")
+                profileImageUrl?.let { url ->
+                    Glide.with(this).load(url).circleCrop().into(binding.profileAvatar)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(
+                    context,
+                    "Failed to load profile image: ${exception.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
     }
 
