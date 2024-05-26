@@ -46,7 +46,7 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
 
         getTaskFromFirebase()
 
-        binding.addTaskBtn.setOnClickListener {
+        binding.addTaskFab.setOnClickListener {
             if (frag != null)
                 childFragmentManager.beginTransaction().remove(frag!!).commit()
             frag = ToDoDialogFragment()
@@ -61,6 +61,7 @@ class HomeFragment : Fragment(), ToDoDialogFragment.OnDialogNextBtnClickListener
         binding.logoutButton.setOnClickListener {
             logout()
         }
+
     }
 
     private fun getTaskFromFirebase() {
